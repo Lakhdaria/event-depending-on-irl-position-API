@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Geolocalisation event</title>
+</head>
+
+<body>
+    <!-- Élément à afficher en fonction de la zone spécifique -->
+    <div id="elementZone1" style="display:none;">
+        <h1>Bienvenue dans la zone 1!</h1>
+        <p>Ce contenu est uniquement visible lorsque vous êtes dans la zone 1.</p>
+    </div>
+
+    <div id="elementZone2" style="display:none;">
+        <h1>Bienvenue dans la zone 2!</h1>
+        <p>Ce contenu est uniquement visible lorsque vous êtes dans la zone 2.</p>
+    </div>
+
+    <div id="elementZone3" style="display:none;">
+        <h1>Bienvenue dans la zone 3!</h1>
+        <p>Ce contenu est uniquement visible lorsque vous êtes dans la zone 3.</p>
+    </div>
+</body>
+
+</html>
+
+
+
+<script>
+    // Coordonnées et rayons des zones
+    var zones = [
+        { latitude: 50.7368023, longitude: 8.3124219, radius: 200 }, // Zone 1
+        { latitude: 49.591950371568814, longitude: 8.555174480683274, radius: 150 },    // Zone 2
+        { latitude: 40.7128, longitude: -74.0060, radius: 200 }   // Zone 3
+    ];
+
+    // Fonction pour vérifier si la position de l'utilisateur est dans l'une des zones spécifiques
+    function checkLocation(position) {
+        var latitude = position.coords.latitude;
+        var longitude = position.coords.longitude;
+
+        // Parcourir toutes les zones pour vérifier si l'utilisateur est dans l'une d'elles
+        zones.forEach(function (zone, index) {
+            var distance = calculateDistance(latitude, longitude, zone.latitude, zone.longitude);
+            // Vérifier si la distance est inférieure ou égale au rayon de la zone
+            if (distance <= zone.radius) {
+                // Afficher l'élément correspondant à la zone
+                document.getElementById("elementZone" + (index + 1)).style.display = "block";
+            } else {
+                // Masquer l'élément si l'utilisateur n'est pas dans la zone
+                document.getElementById("elementZone" + (index + 1)).style.display = "none";
+            }
+        });
+    }
+
+    // Fonction pour calculer la distance entre deux points en utilisant la formule haversine
+    function calculateDistance(lat1, lon1, lat2, lon2) {
+        // Fonction de calcul de distance
+        var R = 6371e3; // Rayon de la Terre en mètres
+        var φ1 = lat1 * Math.PI / 180; // Conversion en radians
+        var φ2 = lat2 * Math.PI / 180;
+        var Δφ = (lat2 - lat1) * Math.PI / 180;
+        var Δλ = (lon2 - lon1) * Math.PI / 180;
+
+        var a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+            Math.cos(φ1) * Math.cos(φ2) *
+            Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+        var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+        var distance = R * c;
+        return distance; // Distance en mètres
+    }
+
+    // Obtenir la position de l'utilisateur
+    navigator.geolocation.getCurrentPosition(checkLocation, function (error) {
+        console.error("Erreur de géolocalisation :", error);
+    });
+</script>
